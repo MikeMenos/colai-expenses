@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Κατάσταση Εξόδων (colai-expenses)
 
-## Getting Started
+Web app for recording a seller’s daily travel expenses, modeled on the MAVROGENIS paper form (kilometers, parking, tolls, dining, and other costs).
 
-First, run the development server:
+## Stack
+
+- **Next.js** (App Router)
+- **React Query** + **Axios** for data fetching
+- **shadcn/ui** + **Tailwind CSS**
+- **Zod** + **react-hook-form** for validation
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Dashboard** (`/`): pick a month, view summary cards and a daily ledger.
+- **Add expense** (`/expenses/new`): date, license plate, route, and expense fields.
+- **Calculations**:
+  - Mileage reimbursement: total km × **0.13** €
+  - Grand total: reimbursement + parking + tolls + dining + other
 
-## Learn More
+## Data storage
 
-To learn more about Next.js, take a look at the following resources:
+Entries are kept in an **in-memory store** on the server. Data is **lost when the dev server restarts**. This is intentional for the first version.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/expenses?month=YYYY-MM` | List entries for a month |
+| `POST` | `/api/expenses` | Create entry (409 if date already exists) |
+| `DELETE` | `/api/expenses/:id` | Delete an entry |
+| `GET` | `/api/expenses/summary?month=YYYY-MM` | Month totals and grand total |
 
-## Deploy on Vercel
+## Field glossary
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Greek (form) | Field |
+|--------------|--------|
+| ΗΜΕΡΟΜΗΝΙΑ | Date |
+| ΔΙΑΔΡΟΜΗ | Route / description |
+| ΧΙΛΙΟΜ. | Kilometers |
+| PARKING | Parking |
+| ΔΙΟΔΙΑ | Tolls |
+| ΕΞΟΔΑ ΕΣΤΙΑΣΗΣ | Dining |
+| ΑΛΛΟ | Other |
+| ΑΡΙΘ. ΚΥΚΛ. | License plate |
