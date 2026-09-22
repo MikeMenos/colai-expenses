@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, lastDayOfMonth } from "date-fns";
 import { el } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
+import { ArrowRight, CalendarIcon } from "lucide-react";
 import { useForm, type UseFormRegisterReturn } from "react-hook-form";
 import { isAxiosError } from "axios";
 import { Badge } from "@/components/ui/badge";
@@ -251,7 +251,8 @@ export function ExpenseForm({ month, onMonthChange }: ExpenseFormProps) {
 
       <div className="flex gap-3">
         <Button type="submit" disabled={createMutation.isPending}>
-          {createMutation.isPending ? "Αποθήκευση…" : "Αποθήκευση"}
+          {createMutation.isPending ? "Καταχώρηση…" : "Καταχώρηση"}
+          {!createMutation.isPending && <ArrowRight className="size-4" />}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.push("/")}>
           Ακύρωση
