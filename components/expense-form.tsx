@@ -22,7 +22,7 @@ import {
 import { MonthPicker } from "@/components/month-picker";
 import { useCreateExpense } from "@/hooks/use-expenses";
 import { mileageReimbursement } from "@/lib/calculations";
-import { MILEAGE_RATE } from "@/lib/constants";
+import { MILEAGE_RATE, ROUTE_PRESETS } from "@/lib/constants";
 import { formatCurrency } from "@/lib/format";
 import { parseMonth } from "@/lib/month";
 import {
@@ -30,12 +30,6 @@ import {
   type CreateExpenseFormValues,
 } from "@/lib/validation";
 import { cn } from "@/lib/utils";
-
-const ROUTE_PRESETS = [
-  { label: "Σάββατο", value: "ΣΑΒΒΑΤΟ" },
-  { label: "Κυριακή", value: "ΚΥΡΙΑΚΗ" },
-  { label: "Αργία", value: "ΑΡΓΙΑ" },
-];
 
 type ExpenseFormProps = {
   month: string;

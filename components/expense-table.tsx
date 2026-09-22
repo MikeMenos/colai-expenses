@@ -1,114 +1,167 @@
 "use client";
 
-import Link from "next/link";
-import { Trash2 } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatCurrency, formatDateEl, formatNumber } from "@/lib/format";
+import { DeleteEntryButton } from "@/components/delete-entry-button";
+import { RouteLabel } from "@/components/route-label";
+import { cn } from "@/lib/utils";
+import {
+  entryTotal,
+  grandTotal,
+  sumExpenseTotals,
+} from "@/lib/calculations";
+import {
+  formatCurrency,
+  formatDayMonthEl,
+  formatNumber,
+  formatWeekdayEl,
+} from "@/lib/format";
 import type { ExpenseEntry } from "@/lib/types";
 
 type ExpenseTableProps = {
   entries: ExpenseEntry[];
-  month: string;
   onDelete: (id: string) => void;
   isDeleting: boolean;
 };
 
+function Amount({ value, strong }: { value: number; strong?: boolean }) {
+  if (value === 0 && !strong) {
+    return <span className="text-muted-foreground/60">—</span>;
+  }
+  return (
+    <span className={cn("tabular-nums", strong && "font-semibold text-accent-blue-ink")}>
+      {formatCurrency(value)}
+    </span>
+  );
+}
+
 export function ExpenseTable({
   entries,
-  month,
   onDelete,
   isDeleting,
 }: ExpenseTableProps) {
-  if (entries.length === 0) {
-    return (
-      <div className="rounded-lg border border-dashed p-10 text-center">
-        <p className="text-muted-foreground">
-          Δεν υπάρχουν καταχωρήσεις για αυτόν τον μήνα.
-        </p>
-        <Link
-          href={`/expenses/new?month=${month}`}
-          className={cn(buttonVariants(), "mt-4 inline-flex cursor-pointer")}
-        >
-          Προσθήκη εξόδου
-        </Link>
-      </div>
-    );
-  }
+  const totals = sumExpenseTotals(entries);
 
   return (
-    <div className="overflow-x-auto rounded-lg border">
+    <div className="hidden overflow-hidden rounded-2xl bg-card ring-1 ring-brand-blue/10 lg:block">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead>Ημερομηνία</TableHead>
-            <TableHead>Αρ. κυκλ.</TableHead>
-            <TableHead className="min-w-[200px]">Διαδρομή</TableHead>
-            <TableHead className="text-right">Χιλιόμ.</TableHead>
-            <TableHead className="text-right">Parking</TableHead>
-            <TableHead className="text-right">Διόδια</TableHead>
-            <TableHead className="text-right">Εστίαση</TableHead>
-            <TableHead className="text-right">Άλλο</TableHead>
-            <TableHead className="w-12" />
+          <TableRow className="border-brand-blue/10 bg-surface-blue/70 hover:bg-surface-blue/70">
+            <ColumnHead className="pl-4">Ημερομηνία</ColumnHead>
+            <ColumnHead>Αρ. κυκλ.</ColumnHead>
+            <ColumnHead className="min-w-[180px]">Διαδρομή</ColumnHead>
+            <ColumnHead align="right">Χιλιόμ.</ColumnHead>
+            <ColumnHead align="right">Parking</ColumnHead>
+            <ColumnHead align="right">Διόδια</ColumnHead>
+            <ColumnHead align="right">Εστίαση</ColumnHead>
+            <ColumnHead align="right">Άλλο</ColumnHead>
+            <ColumnHead align="right" className="bg-surface-blue/60 text-accent-blue-ink">Σύνολο</ColumnHead>
+            <TableHead className="w-10 pr-2" />
           </TableRow>
         </TableHeader>
+
         <TableBody>
           {entries.map((entry) => (
-            <TableRow key={entry.id}>
-              <TableCell className="whitespace-nowrap">
-                {formatDateEl(entry.date)}
+            <TableRow
+              key={entry.id}
+              className="border-border/50 transition-colors hover:bg-surface-blue/50"
+            >
+              <TableCell className="py-3 pl-4">
+                <span className="font-medium tabular-nums">
+                  {formatDayMonthEl(entry.date)}
+                </span>
+                <span className="ml-1.5 text-xs text-muted-foreground">
+                  {formatWeekdayEl(entry.date)}
+                </span>
               </TableCell>
-              <TableCell className="whitespace-nowrap">
-                {entry.licensePlate}
+              <TableCell className="py-3">
+                <span className="rounded-md bg-surface-teal px-1.5 py-0.5 font-mono text-xs tracking-wide text-accent-teal-ink">
+                  {entry.licensePlate}
+                </span>
               </TableCell>
-              <TableCell>{entry.route}</TableCell>
-              <TableCell className="text-right">
+              <TableCell className="max-w-[260px] py-3">
+                <RouteLabel route={entry.route} />
+              </TableCell>
+              <TableCell className="py-3 text-right tabular-nums">
                 {formatNumber(entry.kilometers, 0)}
               </TableCell>
-              <TableCell className="text-right">
-                {formatCurrency(entry.parking)}
+              <TableCell className="py-3 text-right">
+                <Amount value={entry.parking} />
               </TableCell>
-              <TableCell className="text-right">
-                {formatCurrency(entry.tolls)}
+              <TableCell className="py-3 text-right">
+                <Amount value={entry.tolls} />
               </TableCell>
-              <TableCell className="text-right">
-                {formatCurrency(entry.dining)}
+              <TableCell className="py-3 text-right">
+                <Amount value={entry.dining} />
               </TableCell>
-              <TableCell className="text-right">
-                {formatCurrency(entry.other)}
+              <TableCell className="py-3 text-right">
+                <Amount value={entry.other} />
               </TableCell>
-              <TableCell>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  disabled={isDeleting}
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        `Διαγραφή καταχώρησης για ${formatDateEl(entry.date)};`,
-                      )
-                    ) {
-                      onDelete(entry.id);
-                    }
-                  }}
-                  aria-label="Διαγραφή"
-                >
-                  <Trash2 className="size-4 text-destructive" />
-                </Button>
+              <TableCell className="bg-surface-blue/40 py-3 text-right">
+                <Amount value={entryTotal(entry)} strong />
+              </TableCell>
+              <TableCell className="py-3 pr-2">
+                <DeleteEntryButton
+                  entry={entry}
+                  onDelete={onDelete}
+                  isDeleting={isDeleting}
+                />
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
+
+        <TableFooter className="border-brand-blue/10 bg-surface-blue/70">
+          <TableRow className="hover:bg-transparent">
+            <TableCell className="py-3 pl-4 font-medium text-accent-blue-ink" colSpan={3}>
+              Σύνολο μήνα
+            </TableCell>
+            <TableCell className="py-3 text-right tabular-nums">
+              {formatNumber(totals.kilometers, 0)}
+            </TableCell>
+            <TableCell className="py-3 text-right tabular-nums">
+              {formatCurrency(totals.parking)}
+            </TableCell>
+            <TableCell className="py-3 text-right tabular-nums">
+              {formatCurrency(totals.tolls)}
+            </TableCell>
+            <TableCell className="py-3 text-right tabular-nums">
+              {formatCurrency(totals.dining)}
+            </TableCell>
+            <TableCell className="py-3 text-right tabular-nums">
+              {formatCurrency(totals.other)}
+            </TableCell>
+            <TableCell className="bg-surface-blue/50 py-3 text-right text-base font-semibold tabular-nums text-accent-blue-ink">
+              {formatCurrency(grandTotal(totals))}
+            </TableCell>
+            <TableCell className="pr-2" />
+          </TableRow>
+        </TableFooter>
       </Table>
     </div>
+  );
+}
+
+function ColumnHead({
+  className,
+  align = "left",
+  ...props
+}: React.ComponentProps<"th"> & { align?: "left" | "right" }) {
+  return (
+    <TableHead
+      className={cn(
+        "h-10 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase",
+        align === "right" ? "text-right" : "text-left",
+        className,
+      )}
+      {...props}
+    />
   );
 }

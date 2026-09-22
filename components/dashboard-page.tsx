@@ -1,19 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { Suspense } from "react";
-import { Plus } from "lucide-react";
-import { ExpenseTable } from "@/components/expense-table";
-import { MonthPicker } from "@/components/month-picker";
-import { SummaryCards } from "@/components/summary-cards";
-import { cn } from "@/lib/utils";
+import { AddExpenseButton } from "@/components/add-expense-button";
+import { DashboardSummary } from "@/components/dashboard-summary";
+import { ExpenseHistory } from "@/components/expense-history";
+import { ExpenseMetrics } from "@/components/expense-metrics";
 import {
   useDeleteExpense,
   useExpenseSummary,
   useExpenses,
 } from "@/hooks/use-expenses";
 import { useMonthParam } from "@/hooks/use-month-param";
-import { formatMonthLabel } from "@/lib/month";
 
 function DashboardContent() {
   const [month, setMonth] = useMonthParam();
@@ -22,42 +19,30 @@ function DashboardContent() {
   const deleteMutation = useDeleteExpense(month);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">{formatMonthLabel(month)}</p>
+    <>
+      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 pt-4 pb-28 sm:px-6 sm:gap-10 sm:pt-6 sm:pb-32 lg:px-8">
+        <div className="flex flex-col gap-3 sm:gap-4">
+          <DashboardSummary
+            month={month}
+            onMonthChange={setMonth}
+            summary={summary}
+            isLoading={summaryLoading}
+          />
+
+          <ExpenseMetrics summary={summary} isLoading={summaryLoading} />
         </div>
-        <div className="flex flex-wrap items-end gap-3">
-          <MonthPicker value={month} onChange={setMonth} />
-          <Link
-            href={`/expenses/new?month=${month}`}
-            className={cn(
-              "inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-transparent bg-primary px-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/80",
-            )}
-          >
-            <Plus className="size-4" />
-            Νέα καταχώρηση
-          </Link>
-        </div>
+
+        <ExpenseHistory
+          entries={entries}
+          month={month}
+          isLoading={entriesLoading}
+          onDelete={(id) => deleteMutation.mutate(id)}
+          isDeleting={deleteMutation.isPending}
+        />
       </div>
 
-      <SummaryCards summary={summary} isLoading={summaryLoading} />
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-medium">Ημερήσιες καταχωρήσεις</h2>
-        {entriesLoading ? (
-          <p className="text-sm text-muted-foreground">Φόρτωση…</p>
-        ) : (
-          <ExpenseTable
-            entries={entries}
-            month={month}
-            onDelete={(id) => deleteMutation.mutate(id)}
-            isDeleting={deleteMutation.isPending}
-          />
-        )}
-      </section>
-    </div>
+      <AddExpenseButton month={month} />
+    </>
   );
 }
 

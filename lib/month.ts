@@ -1,4 +1,4 @@
-import { format, parse } from "date-fns";
+import { addMonths, format, parse } from "date-fns";
 import { el } from "date-fns/locale";
 
 export function currentMonth(): string {
@@ -27,4 +27,8 @@ export function monthOptions(count = 12): { value: string; label: string }[] {
 
 export function isValidMonth(month: string): boolean {
   return /^\d{4}-\d{2}$/.test(month);
+}
+
+export function shiftMonth(month: string, delta: number): string {
+  return format(addMonths(parseMonth(month), delta), "yyyy-MM");
 }

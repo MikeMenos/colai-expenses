@@ -22,6 +22,7 @@ export function MonthPicker({ value, onChange, label = "Μήνας" }: MonthPick
     <div className="flex flex-col gap-2">
       <span className="text-sm font-medium text-muted-foreground">{label}</span>
       <Select
+        items={options}
         value={value}
         onValueChange={(next) => {
           if (next) onChange(next);

@@ -18,7 +18,7 @@ export function mileageReimbursement(kilometers: number): number {
   return kilometers * MILEAGE_RATE;
 }
 
-export function outOfPocketTotal(totals: ExpenseTotals): number {
+export function outOfPocketTotal(totals: Omit<ExpenseTotals, "kilometers">): number {
   return totals.parking + totals.tolls + totals.dining + totals.other;
 }
 
@@ -39,4 +39,8 @@ export function buildMonthSummary(
     grandTotal: reimbursement + outOfPocketTotal(totals),
     entryCount: entries.length,
   };
+}
+
+export function entryTotal(entry: ExpenseEntry): number {
+  return mileageReimbursement(entry.kilometers) + outOfPocketTotal(entry);
 }

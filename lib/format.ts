@@ -1,3 +1,6 @@
+import { format } from "date-fns";
+import { el } from "date-fns/locale";
+
 export function formatCurrency(value: number): string {
   return new Intl.NumberFormat("el-GR", {
     style: "currency",
@@ -12,8 +15,19 @@ export function formatNumber(value: number, decimals = 2): string {
   }).format(value);
 }
 
-export function formatDateEl(dateStr: string): string {
+export function parseDateEl(dateStr: string): Date {
   const [y, m, d] = dateStr.split("-").map(Number);
-  const date = new Date(y, m - 1, d);
-  return new Intl.DateTimeFormat("el-GR").format(date);
+  return new Date(y, m - 1, d);
+}
+
+export function formatDateEl(dateStr: string): string {
+  return new Intl.DateTimeFormat("el-GR").format(parseDateEl(dateStr));
+}
+
+export function formatDayMonthEl(dateStr: string): string {
+  return format(parseDateEl(dateStr), "d MMM", { locale: el });
+}
+
+export function formatWeekdayEl(dateStr: string): string {
+  return format(parseDateEl(dateStr), "EEE", { locale: el });
 }
