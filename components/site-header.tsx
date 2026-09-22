@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
+    <header className="sticky top-0 z-30 bg-background">
       <div className="mx-auto flex h-14 max-w-6xl items-center px-4 sm:px-6 lg:px-8">
         <Link
           href="/"

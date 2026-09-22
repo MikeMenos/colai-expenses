@@ -26,7 +26,7 @@ export function MetricCard({
   return (
     <Card
       className={cn(
-        "gap-0 rounded-2xl bg-neutral-50 ring-0 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-foreground/5 motion-reduce:hover:translate-y-0 dark:bg-neutral-900",
+        "gap-0 rounded-2xl bg-neutral-100 ring-0 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-foreground/5 motion-reduce:hover:translate-y-0 dark:bg-neutral-900",
         className,
       )}
     >

@@ -22,7 +22,8 @@ export function DashboardSummary({
   return (
     <section
       aria-labelledby="grand-total-label"
-      className="relative overflow-hidden rounded-3xl bg-[linear-gradient(135deg,var(--hero-from)_0%,var(--hero-to)_62%)] px-6 py-9 text-center text-white sm:px-10 sm:py-9"
+      className="relative isolate overflow-hidden rounded-3xl bg-[linear-gradient(135deg,var(--hero-from)_0%,var(--hero-to)_62%)] px-6 py-11 text-center text-white sm:px-10 sm:py-12"
+      style={{ clipPath: "inset(0 round calc(var(--radius) * 2.2))" }}
     >
       <span
         aria-hidden
