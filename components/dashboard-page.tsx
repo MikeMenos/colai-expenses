@@ -20,7 +20,7 @@ function DashboardContent() {
 
   return (
     <>
-      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 pt-4 pb-28 sm:px-6 sm:gap-10 sm:pt-6 sm:pb-32 lg:px-8">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 pt-4 pb-28 sm:px-6 sm:gap-10 sm:pt-6 sm:pb-10 lg:px-8">
         <div className="flex flex-col gap-3 sm:gap-4">
           <DashboardSummary
             month={month}

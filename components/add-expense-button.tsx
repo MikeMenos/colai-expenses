@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 
 export function AddExpenseButton({ month }: { month: string }) {
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-end px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:hidden">
       <Link
         href={`/expenses/new?month=${month}`}
         aria-label="Νέα καταχώρηση"
