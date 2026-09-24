@@ -1,5 +1,8 @@
 "use client";
 
+import { isToday, isWeekend } from "date-fns";
+import { AddExpenseButton } from "@/components/add-expense-button";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -22,11 +25,12 @@ import {
   formatDayMonthEl,
   formatNumber,
   formatWeekdayEl,
+  parseDateEl,
 } from "@/lib/format";
-import type { ExpenseEntry } from "@/lib/types";
+import type { MonthDayEntry } from "@/lib/month-days";
 
 type ExpenseTableProps = {
-  entries: ExpenseEntry[];
+  days: MonthDayEntry[];
   onDelete: (id: string) => void;
   isDeleting: boolean;
 };
@@ -43,10 +47,11 @@ function Amount({ value, strong }: { value: number; strong?: boolean }) {
 }
 
 export function ExpenseTable({
-  entries,
+  days,
   onDelete,
   isDeleting,
 }: ExpenseTableProps) {
+  const entries = days.flatMap((day) => day.expenses);
   const totals = sumExpenseTotals(entries);
 
   return (
@@ -58,64 +63,115 @@ export function ExpenseTable({
             <ColumnHead>Αρ. κυκλ.</ColumnHead>
             <ColumnHead className="min-w-[180px]">Διαδρομή</ColumnHead>
             <ColumnHead align="right">Χιλιόμ.</ColumnHead>
+            <ColumnHead align="right">Καύσιμα</ColumnHead>
             <ColumnHead align="right">Parking</ColumnHead>
             <ColumnHead align="right">Διόδια</ColumnHead>
             <ColumnHead align="right">Εστίαση</ColumnHead>
             <ColumnHead align="right">Άλλο</ColumnHead>
             <ColumnHead align="right" className="bg-surface-blue/60 text-accent-blue-ink">Σύνολο</ColumnHead>
-            <TableHead className="w-10 pr-2" />
+            <TableHead className="w-40 pr-2" />
           </TableRow>
         </TableHeader>
 
         <TableBody>
-          {entries.map((entry) => (
-            <TableRow
-              key={entry.id}
-              className="border-border/50 transition-colors hover:bg-surface-blue/50"
-            >
-              <TableCell className="py-3 pl-4">
-                <span className="font-medium tabular-nums">
-                  {formatDayMonthEl(entry.date)}
-                </span>
-                <span className="ml-1.5 text-xs text-muted-foreground">
-                  {formatWeekdayEl(entry.date)}
-                </span>
-              </TableCell>
-              <TableCell className="py-3">
-                <span className="rounded-md bg-surface-teal px-1.5 py-0.5 font-mono text-xs tracking-wide text-accent-teal-ink">
-                  {entry.licensePlate}
-                </span>
-              </TableCell>
-              <TableCell className="max-w-[260px] py-3">
-                <RouteLabel route={entry.route} />
-              </TableCell>
-              <TableCell className="py-3 text-right tabular-nums">
-                {formatNumber(entry.kilometers, 0)}
-              </TableCell>
-              <TableCell className="py-3 text-right">
-                <Amount value={entry.parking} />
-              </TableCell>
-              <TableCell className="py-3 text-right">
-                <Amount value={entry.tolls} />
-              </TableCell>
-              <TableCell className="py-3 text-right">
-                <Amount value={entry.dining} />
-              </TableCell>
-              <TableCell className="py-3 text-right">
-                <Amount value={entry.other} />
-              </TableCell>
-              <TableCell className="bg-surface-blue/40 py-3 text-right">
-                <Amount value={entryTotal(entry)} strong />
-              </TableCell>
-              <TableCell className="py-3 pr-2">
-                <DeleteEntryButton
-                  entry={entry}
-                  onDelete={onDelete}
-                  isDeleting={isDeleting}
-                />
-              </TableCell>
-            </TableRow>
-          ))}
+          {days.map((day) => {
+            const localDate = parseDateEl(day.date);
+            const today = isToday(localDate);
+            const weekend = isWeekend(localDate);
+
+            if (day.status === "empty") {
+              return (
+                <TableRow
+                  key={day.date}
+                  className={cn(
+                    "border-border/50 border-dashed bg-muted/25 text-muted-foreground transition-colors hover:bg-muted/50",
+                    weekend && "bg-surface-amber/25",
+                    today && "bg-surface-teal/40 outline-2 -outline-offset-2 outline-brand-teal/35",
+                  )}
+                >
+                  <TableCell className="py-2.5 pl-4">
+                    <span className="font-medium tabular-nums text-foreground">
+                      {formatDayMonthEl(day.date)}
+                    </span>
+                    <span className="ml-1.5 text-xs">
+                      {formatWeekdayEl(day.date)}
+                    </span>
+                    {today && <span className="ml-1.5 text-xs font-medium text-accent-teal-ink">Σήμερα</span>}
+                  </TableCell>
+                  <TableCell className="py-2.5">
+                    <Badge variant="outline" className="border-dashed text-muted-foreground">
+                      Χωρίς καταχώρηση
+                    </Badge>
+                  </TableCell>
+                  <EmptyCells count={7} />
+                  <TableCell className="bg-muted/30 py-2.5 text-right font-semibold tabular-nums">
+                    {formatCurrency(0)}
+                  </TableCell>
+                  <TableCell className="py-2.5 pr-2 text-right">
+                    <AddExpenseButton date={day.date} compact />
+                  </TableCell>
+                </TableRow>
+              );
+            }
+
+            const entry = day.expenses[0];
+            return (
+              <TableRow
+                key={day.date}
+                className={cn(
+                  "border-border/50 transition-colors hover:bg-surface-blue/50",
+                  weekend && "bg-surface-amber/20",
+                  today && "bg-surface-teal/30 outline-2 -outline-offset-2 outline-brand-teal/35",
+                )}
+              >
+                <TableCell className="py-3 pl-4">
+                  <span className="font-medium tabular-nums">
+                    {formatDayMonthEl(entry.date)}
+                  </span>
+                  <span className="ml-1.5 text-xs text-muted-foreground">
+                    {formatWeekdayEl(entry.date)}
+                  </span>
+                  {today && <span className="ml-1.5 text-xs font-medium text-accent-teal-ink">Σήμερα</span>}
+                </TableCell>
+                <TableCell className="py-3">
+                  <span className="rounded-md bg-surface-teal px-1.5 py-0.5 font-mono text-xs tracking-wide text-accent-teal-ink">
+                    {entry.licensePlate}
+                  </span>
+                </TableCell>
+                <TableCell className="max-w-[260px] py-3">
+                  <RouteLabel route={entry.route} />
+                </TableCell>
+                <TableCell className="py-3 text-right tabular-nums">
+                  {formatNumber(entry.kilometers, 0)}
+                </TableCell>
+                <TableCell className="py-3 text-right">
+                  <Amount value={entry.fuel} />
+                </TableCell>
+                <TableCell className="py-3 text-right">
+                  <Amount value={entry.parking} />
+                </TableCell>
+                <TableCell className="py-3 text-right">
+                  <Amount value={entry.tolls} />
+                </TableCell>
+                <TableCell className="py-3 text-right">
+                  <Amount value={entry.dining} />
+                </TableCell>
+                <TableCell className="py-3 text-right">
+                  <Amount value={entry.other} />
+                </TableCell>
+                <TableCell className="bg-surface-blue/40 py-3 text-right">
+                  <Amount value={entryTotal(entry)} strong />
+                </TableCell>
+                <TableCell className="py-3 pr-2">
+                  <DeleteEntryButton
+                    entry={entry}
+                    onDelete={onDelete}
+                    isDeleting={isDeleting}
+                  />
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
 
         <TableFooter className="border-brand-blue/10 bg-surface-blue/70">
@@ -125,6 +181,9 @@ export function ExpenseTable({
             </TableCell>
             <TableCell className="py-3 text-right tabular-nums">
               {formatNumber(totals.kilometers, 0)}
+            </TableCell>
+              <TableCell className="py-3 text-right tabular-nums">
+              {formatCurrency(totals.fuel)}
             </TableCell>
             <TableCell className="py-3 text-right tabular-nums">
               {formatCurrency(totals.parking)}
@@ -147,6 +206,14 @@ export function ExpenseTable({
       </Table>
     </div>
   );
+}
+
+function EmptyCells({ count }: { count: number }) {
+  return Array.from({ length: count }, (_, index) => (
+    <TableCell key={index} className="py-2.5 text-right" aria-label="Δεν εφαρμόζεται">
+      <span aria-hidden>—</span>
+    </TableCell>
+  ));
 }
 
 function ColumnHead({

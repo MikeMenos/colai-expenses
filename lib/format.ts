@@ -31,3 +31,7 @@ export function formatDayMonthEl(dateStr: string): string {
 export function formatWeekdayEl(dateStr: string): string {
   return format(parseDateEl(dateStr), "EEE", { locale: el });
 }
+
+export function formatAccessibleDateEl(dateStr: string): string {
+  return format(parseDateEl(dateStr), "EEEE d MMMM yyyy", { locale: el });
+}

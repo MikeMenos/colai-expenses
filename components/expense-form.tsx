@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, lastDayOfMonth } from "date-fns";
@@ -24,7 +24,7 @@ import { useCreateExpense } from "@/hooks/use-expenses";
 import { mileageReimbursement } from "@/lib/calculations";
 import { MILEAGE_RATE, ROUTE_PRESETS } from "@/lib/constants";
 import { formatCurrency } from "@/lib/format";
-import { parseMonth } from "@/lib/month";
+import { isDateInMonth, parseMonth } from "@/lib/month";
 import {
   createExpenseSchema,
   type CreateExpenseFormValues,
@@ -33,30 +33,45 @@ import { cn } from "@/lib/utils";
 
 type ExpenseFormProps = {
   month: string;
+  initialDate?: string;
   onMonthChange: (month: string) => void;
 };
 
-export function ExpenseForm({ month, onMonthChange }: ExpenseFormProps) {
+export function ExpenseForm({
+  month,
+  initialDate,
+  onMonthChange,
+}: ExpenseFormProps) {
   const router = useRouter();
   const createMutation = useCreateExpense(month);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const monthStart = parseMonth(month);
   const monthEnd = lastDayOfMonth(monthStart);
+  const defaultDate = initialDate && isDateInMonth(initialDate, month)
+    ? initialDate
+    : format(monthStart, "yyyy-MM-dd");
 
   const form = useForm<CreateExpenseFormValues>({
     resolver: zodResolver(createExpenseSchema),
     defaultValues: {
-      date: format(monthStart, "yyyy-MM-dd"),
+      date: defaultDate,
       licensePlate: "",
       route: "",
       kilometers: 0,
+      fuel: 0,
       parking: 0,
       tolls: 0,
       dining: 0,
       other: 0,
     },
   });
+
+  useEffect(() => {
+    if (!isDateInMonth(form.getValues("date"), month)) {
+      form.setValue("date", defaultDate, { shouldValidate: true });
+    }
+  }, [defaultDate, form, month]);
 
   const watched = form.watch();
   const selectedDate = useMemo(() => {
@@ -70,6 +85,7 @@ export function ExpenseForm({ month, onMonthChange }: ExpenseFormProps) {
 
   const dayReimbursement = mileageReimbursement(Number(watched.kilometers) || 0);
   const dayOutOfPocket =
+    (Number(watched.fuel) || 0) +
     (Number(watched.parking) || 0) +
     (Number(watched.tolls) || 0) +
     (Number(watched.dining) || 0) +
@@ -189,6 +205,13 @@ export function ExpenseForm({ month, onMonthChange }: ExpenseFormProps) {
           step="1"
           register={form.register("kilometers", { valueAsNumber: true })}
           error={form.formState.errors.kilometers?.message}
+        />
+        <NumberField
+          label="Καύσιμα"
+          id="fuel"
+          step="0.01"
+          register={form.register("fuel", { valueAsNumber: true })}
+          error={form.formState.errors.fuel?.message}
         />
         <NumberField
           label="Parking"

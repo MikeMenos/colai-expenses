@@ -46,6 +46,7 @@ Entries are kept in an **in-memory store** on the server. Data is **lost when th
 | ΗΜΕΡΟΜΗΝΙΑ | Date |
 | ΔΙΑΔΡΟΜΗ | Route / description |
 | ΧΙΛΙΟΜ. | Kilometers |
+| ΚΑΥΣΙΜΑ | Fuel |
 | PARKING | Parking |
 | ΔΙΟΔΙΑ | Tolls |
 | ΕΞΟΔΑ ΕΣΤΙΑΣΗΣ | Dining |

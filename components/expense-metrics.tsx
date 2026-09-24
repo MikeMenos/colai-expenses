@@ -86,9 +86,10 @@ export function ExpenseMetrics({ summary, isLoading }: ExpenseMetricsProps) {
 
   const { totals, mileageReimbursement, entryCount } = summary;
   const outOfPocket =
-    totals.parking + totals.tolls + totals.dining + totals.other;
+    totals.fuel + totals.parking + totals.tolls + totals.dining + totals.other;
 
   const breakdown = [
+    { label: "Καύσιμα", value: totals.fuel },
     { label: "Parking", value: totals.parking },
     { label: "Διόδια", value: totals.tolls },
     { label: "Εστίαση", value: totals.dining },

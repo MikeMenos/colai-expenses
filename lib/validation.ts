@@ -5,6 +5,7 @@ export const createExpenseSchema = z.object({
   licensePlate: z.string().trim().min(1, "License plate is required"),
   route: z.string().trim().min(1, "Route is required"),
   kilometers: z.number().min(0),
+  fuel: z.number().min(0),
   parking: z.number().min(0),
   tolls: z.number().min(0),
   dining: z.number().min(0),

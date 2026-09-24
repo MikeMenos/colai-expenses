@@ -5,12 +5,13 @@ export function sumExpenseTotals(entries: ExpenseEntry[]): ExpenseTotals {
   return entries.reduce(
     (acc, entry) => ({
       kilometers: acc.kilometers + entry.kilometers,
+      fuel: acc.fuel + entry.fuel,
       parking: acc.parking + entry.parking,
       tolls: acc.tolls + entry.tolls,
       dining: acc.dining + entry.dining,
       other: acc.other + entry.other,
     }),
-    { kilometers: 0, parking: 0, tolls: 0, dining: 0, other: 0 },
+    { kilometers: 0, fuel: 0, parking: 0, tolls: 0, dining: 0, other: 0 },
   );
 }
 
@@ -19,7 +20,7 @@ export function mileageReimbursement(kilometers: number): number {
 }
 
 export function outOfPocketTotal(totals: Omit<ExpenseTotals, "kilometers">): number {
-  return totals.parking + totals.tolls + totals.dining + totals.other;
+  return totals.fuel + totals.parking + totals.tolls + totals.dining + totals.other;
 }
 
 export function grandTotal(totals: ExpenseTotals): number {

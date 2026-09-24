@@ -4,6 +4,7 @@ export type ExpenseEntry = {
   licensePlate: string;
   route: string;
   kilometers: number;
+  fuel: number;
   parking: number;
   tolls: number;
   dining: number;
@@ -13,6 +14,7 @@ export type ExpenseEntry = {
 
 export type ExpenseTotals = {
   kilometers: number;
+  fuel: number;
   parking: number;
   tolls: number;
   dining: number;
@@ -32,6 +34,7 @@ export type CreateExpenseInput = {
   licensePlate: string;
   route: string;
   kilometers: number;
+  fuel: number;
   parking: number;
   tolls: number;
   dining: number;

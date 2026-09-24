@@ -4,11 +4,17 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ArrowLeft } from "lucide-react";
 import { ExpenseForm } from "@/components/expense-form";
+import { useSearchParams } from "next/navigation";
 import { useMonthParam } from "@/hooks/use-month-param";
-import { formatMonthLabel } from "@/lib/month";
+import { formatMonthLabel, isDateInMonth } from "@/lib/month";
 
 function NewExpenseContent() {
   const [month, setMonth] = useMonthParam();
+  const searchParams = useSearchParams();
+  const requestedDate = searchParams.get("date");
+  const initialDate = isDateInMonth(requestedDate, month)
+    ? requestedDate
+    : undefined;
 
   return (
     <div className="mx-auto max-w-6xl px-4 pt-8 pb-16 sm:px-6 sm:pt-10 lg:px-8">
@@ -27,7 +33,11 @@ function NewExpenseContent() {
           <p className="mt-1 text-muted-foreground">{formatMonthLabel(month)}</p>
         </div>
       </div>
-      <ExpenseForm month={month} onMonthChange={setMonth} />
+      <ExpenseForm
+        month={month}
+        initialDate={initialDate}
+        onMonthChange={setMonth}
+      />
     </div>
   );
 }
