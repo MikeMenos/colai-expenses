@@ -1,6 +1,6 @@
 # Κατάσταση Εξόδων (colai-expenses)
 
-Web app for recording a seller’s daily travel expenses, modeled on the MAVROGENIS paper form (kilometers, parking, tolls, dining, and other costs).
+Web app for recording a seller’s daily travel expenses, modeled on the MAVROGENIS paper form (kilometers, fuel, parking, tolls, dining, and other costs).
 
 ## Stack
 
@@ -24,7 +24,7 @@ Open [http://localhost:3000](http://localhost:3000).
 - **Add expense** (`/expenses/new`): date, license plate, route, and expense fields.
 - **Calculations**:
   - Mileage reimbursement: total km × **0.13** €
-  - Grand total: reimbursement + parking + tolls + dining + other
+  - Grand total: reimbursement + parking + fuel + tolls + dining + other
 
 ## Data storage
 

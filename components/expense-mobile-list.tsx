@@ -6,7 +6,7 @@ import { AddExpenseButton } from "@/components/add-expense-button";
 import { Badge } from "@/components/ui/badge";
 import { DeleteEntryButton } from "@/components/delete-entry-button";
 import { RouteLabel } from "@/components/route-label";
-import { entryTotal } from "@/lib/calculations";
+import { entryTotal, entryTotals } from "@/lib/calculations";
 import {
   formatCurrency,
   formatDayMonthEl,
@@ -16,7 +16,7 @@ import {
 } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { MonthDayEntry } from "@/lib/month-days";
-import type { ExpenseEntry } from "@/lib/types";
+import type { ExpenseTotals } from "@/lib/types";
 
 type ExpenseMobileListProps = {
   days: MonthDayEntry[];
@@ -24,7 +24,7 @@ type ExpenseMobileListProps = {
   isDeleting: boolean;
 };
 
-function costChips(entry: ExpenseEntry) {
+function costChips(entry: ExpenseTotals) {
   return [
     { label: "Καύσιμα", value: entry.fuel },
     { label: "Parking", value: entry.parking },
@@ -81,7 +81,8 @@ export function ExpenseMobileList({
         }
 
         const entry = day.expenses[0];
-        const chips = costChips(entry);
+        const totals = entryTotals(entry);
+        const chips = costChips(totals);
 
         return (
           <li
@@ -112,14 +113,18 @@ export function ExpenseMobileList({
               </p>
             </div>
 
-            <RouteLabel route={entry.route} className="text-sm" />
+            <div className="flex flex-col gap-1">
+              {entry.routes.map((route, index) => (
+                <RouteLabel key={index} route={route.route} className="text-sm" />
+              ))}
+            </div>
 
             <div className="flex items-center justify-between gap-2 border-t border-brand-blue/8 pt-2.5">
               <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1">
                   <Gauge className="size-3.5" />
                   <span className="tabular-nums">
-                    {formatNumber(entry.kilometers, 0)} km
+                    {formatNumber(totals.kilometers, 0)} km
                   </span>
                 </span>
                 {chips.map((chip) => (
@@ -131,13 +136,16 @@ export function ExpenseMobileList({
                   </span>
                 ))}
               </div>
-              <DeleteEntryButton
-                entry={entry}
-                onDelete={onDelete}
-                isDeleting={isDeleting}
-                size="icon"
-                className="-mr-1 shrink-0 size-9 rounded-lg"
-              />
+              <div className="flex shrink-0 items-center gap-1">
+                <AddExpenseButton date={day.date} compact hasExpenses />
+                <DeleteEntryButton
+                  entry={entry}
+                  onDelete={onDelete}
+                  isDeleting={isDeleting}
+                  size="icon"
+                  className="-mr-1 shrink-0 size-9 rounded-lg"
+                />
+              </div>
             </div>
           </li>
         );

@@ -26,13 +26,13 @@ export function ExpenseHistory({
 
   return (
     <section aria-labelledby="history-heading" className="flex flex-col gap-3">
-      <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center sm:gap-3">
+      <div className="flex items-center justify-between gap-3">
         <h2 id="history-heading" className="font-heading text-lg font-semibold tracking-tight">
           Ημερήσιες καταχωρήσεις
         </h2>
         {!isLoading && (
-          <span className="rounded-full bg-surface-blue px-2.5 py-1 text-xs font-semibold text-accent-blue-ink tabular-nums">
-            {filledDays} από {days.length} ημέρες συμπληρωμένες
+          <span className="shrink-0 rounded-full bg-surface-blue px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-accent-blue-ink tabular-nums">
+            {filledDays}/{days.length} συμπληρωμένες
           </span>
         )}
       </div>

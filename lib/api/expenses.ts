@@ -22,6 +22,17 @@ export async function createExpense(
   return data;
 }
 
+export async function updateExpense(
+  id: string,
+  payload: CreateExpenseInput,
+): Promise<ExpenseEntry> {
+  const { data } = await apiClient.put<ExpenseEntry>(
+    `/api/expenses/${id}`,
+    payload,
+  );
+  return data;
+}
+
 export async function deleteExpense(id: string): Promise<void> {
   await apiClient.delete(`/api/expenses/${id}`);
 }

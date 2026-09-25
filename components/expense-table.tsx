@@ -16,6 +16,7 @@ import { DeleteEntryButton } from "@/components/delete-entry-button";
 import { RouteLabel } from "@/components/route-label";
 import { cn } from "@/lib/utils";
 import {
+  entryTotals,
   entryTotal,
   grandTotal,
   sumExpenseTotals,
@@ -115,6 +116,7 @@ export function ExpenseTable({
             }
 
             const entry = day.expenses[0];
+            const totals = entryTotals(entry);
             return (
               <TableRow
                 key={day.date}
@@ -139,35 +141,42 @@ export function ExpenseTable({
                   </span>
                 </TableCell>
                 <TableCell className="max-w-[260px] py-3">
-                  <RouteLabel route={entry.route} />
+                  <div className="flex flex-col gap-1">
+                    {entry.routes.map((route, index) => (
+                      <RouteLabel key={index} route={route.route} />
+                    ))}
+                  </div>
                 </TableCell>
                 <TableCell className="py-3 text-right tabular-nums">
-                  {formatNumber(entry.kilometers, 0)}
+                  {formatNumber(totals.kilometers, 0)}
                 </TableCell>
                 <TableCell className="py-3 text-right">
-                  <Amount value={entry.fuel} />
+                  <Amount value={totals.fuel} />
                 </TableCell>
                 <TableCell className="py-3 text-right">
-                  <Amount value={entry.parking} />
+                  <Amount value={totals.parking} />
                 </TableCell>
                 <TableCell className="py-3 text-right">
-                  <Amount value={entry.tolls} />
+                  <Amount value={totals.tolls} />
                 </TableCell>
                 <TableCell className="py-3 text-right">
-                  <Amount value={entry.dining} />
+                  <Amount value={totals.dining} />
                 </TableCell>
                 <TableCell className="py-3 text-right">
-                  <Amount value={entry.other} />
+                  <Amount value={totals.other} />
                 </TableCell>
                 <TableCell className="bg-surface-blue/40 py-3 text-right">
                   <Amount value={entryTotal(entry)} strong />
                 </TableCell>
                 <TableCell className="py-3 pr-2">
-                  <DeleteEntryButton
-                    entry={entry}
-                    onDelete={onDelete}
-                    isDeleting={isDeleting}
-                  />
+                  <div className="flex items-center justify-end gap-1">
+                    <AddExpenseButton date={day.date} compact hasExpenses />
+                    <DeleteEntryButton
+                      entry={entry}
+                      onDelete={onDelete}
+                      isDeleting={isDeleting}
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             );

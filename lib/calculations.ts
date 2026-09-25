@@ -4,12 +4,12 @@ import type { ExpenseEntry, ExpenseTotals, MonthSummary } from "@/lib/types";
 export function sumExpenseTotals(entries: ExpenseEntry[]): ExpenseTotals {
   return entries.reduce(
     (acc, entry) => ({
-      kilometers: acc.kilometers + entry.kilometers,
-      fuel: acc.fuel + entry.fuel,
-      parking: acc.parking + entry.parking,
-      tolls: acc.tolls + entry.tolls,
-      dining: acc.dining + entry.dining,
-      other: acc.other + entry.other,
+      kilometers: acc.kilometers + sumRoutes(entry),
+      fuel: acc.fuel + sumAmounts(entry.fuel),
+      parking: acc.parking + sumAmounts(entry.parking),
+      tolls: acc.tolls + sumAmounts(entry.tolls),
+      dining: acc.dining + sumAmounts(entry.dining),
+      other: acc.other + sumAmounts(entry.other),
     }),
     { kilometers: 0, fuel: 0, parking: 0, tolls: 0, dining: 0, other: 0 },
   );
@@ -43,5 +43,25 @@ export function buildMonthSummary(
 }
 
 export function entryTotal(entry: ExpenseEntry): number {
-  return mileageReimbursement(entry.kilometers) + outOfPocketTotal(entry);
+  const totals = entryTotals(entry);
+  return grandTotal(totals);
+}
+
+export function sumAmounts(entries: ExpenseEntry["fuel"]): number {
+  return entries.reduce((total, entry) => total + entry.amount, 0);
+}
+
+export function sumRoutes(entry: ExpenseEntry): number {
+  return entry.routes.reduce((total, route) => total + route.kilometers, 0);
+}
+
+export function entryTotals(entry: ExpenseEntry): ExpenseTotals {
+  return {
+    kilometers: sumRoutes(entry),
+    fuel: sumAmounts(entry.fuel),
+    parking: sumAmounts(entry.parking),
+    tolls: sumAmounts(entry.tolls),
+    dining: sumAmounts(entry.dining),
+    other: sumAmounts(entry.other),
+  };
 }

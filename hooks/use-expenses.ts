@@ -10,6 +10,7 @@ import {
   deleteExpense,
   fetchExpenses,
   fetchSummary,
+  updateExpense,
 } from "@/lib/api/expenses";
 import type { CreateExpenseInput } from "@/lib/types";
 
@@ -40,6 +41,20 @@ export function useCreateExpense(month: string) {
 
   return useMutation({
     mutationFn: (payload: CreateExpenseInput) => createExpense(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.list });
+      queryClient.invalidateQueries({ queryKey: keys.summary });
+    },
+  });
+}
+
+export function useUpdateExpense(month: string) {
+  const queryClient = useQueryClient();
+  const keys = expenseKeys(month);
+
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: CreateExpenseInput }) =>
+      updateExpense(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: keys.list });
       queryClient.invalidateQueries({ queryKey: keys.summary });

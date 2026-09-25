@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { formatAccessibleDateEl } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -18,24 +18,29 @@ type AddExpenseButtonProps =
       month?: never;
       compact?: boolean;
       className?: string;
+      hasExpenses?: boolean;
     };
 
 export function AddExpenseButton(props: AddExpenseButtonProps) {
   if (props.date) {
     const month = props.date.slice(0, 7);
     const params = new URLSearchParams({ month, date: props.date });
+    const isEditing = Boolean(props.hasExpenses);
 
     return (
       <Link
         href={`/expenses/new?${params.toString()}`}
-        aria-label={`Προσθήκη εξόδου για ${formatAccessibleDateEl(props.date)}`}
+        aria-label={`${isEditing ? "Επεξεργασία εξόδων" : "Προσθήκη εξόδων"} για ${formatAccessibleDateEl(props.date)}`}
         className={cn(
           buttonVariants({ size: props.compact ? "sm" : "default" }),
           !props.compact && "min-h-11 px-4",
           props.className,
         )}
       >
-        <Plus />
+        {isEditing ? <Pencil /> : <Plus />}
+        {props.compact && (
+          <span>{isEditing ? "Επεξεργασία" : "Προσθήκη"}</span>
+        )}
       </Link>
     );
   }

@@ -6,19 +6,25 @@ import { ArrowLeft } from "lucide-react";
 import { ExpenseForm } from "@/components/expense-form";
 import { useSearchParams } from "next/navigation";
 import { useMonthParam } from "@/hooks/use-month-param";
+import { useExpenses } from "@/hooks/use-expenses";
 import { formatMonthLabel, isDateInMonth } from "@/lib/month";
 
 function NewExpenseContent() {
-  const [month, setMonth] = useMonthParam();
+  const [month] = useMonthParam();
   const searchParams = useSearchParams();
   const requestedDate = searchParams.get("date");
   const initialDate = isDateInMonth(requestedDate, month)
     ? requestedDate
     : undefined;
+  const { data: entries, isLoading, isError } = useExpenses(month);
+  const existingEntry = initialDate
+    ? entries?.find((entry) => entry.date === initialDate)
+    : undefined;
+  const isLoadingExisting = Boolean(initialDate) && isLoading;
 
   return (
     <div className="mx-auto max-w-6xl px-4 pt-8 pb-16 sm:px-6 sm:pt-10 lg:px-8">
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-3xl">
         <Link
           href={`/?month=${month}`}
           className="-ml-1 inline-flex items-center gap-1.5 rounded-md px-1 py-1 text-sm text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -28,16 +34,25 @@ function NewExpenseContent() {
         </Link>
         <div className="mt-3 mb-8">
           <h1 className="font-heading text-2xl font-semibold tracking-tight">
-            Καταχώρηση εξόδου
+            {existingEntry ? "Επεξεργασία εξόδων" : "Καταχώρηση εξόδων"}
           </h1>
           <p className="mt-1 text-muted-foreground">{formatMonthLabel(month)}</p>
         </div>
       </div>
-      <ExpenseForm
-        month={month}
-        initialDate={initialDate}
-        onMonthChange={setMonth}
-      />
+      {isLoadingExisting ? (
+        <div className="mx-auto h-72 max-w-3xl animate-pulse rounded-2xl bg-surface-blue/60" />
+      ) : isError && initialDate ? (
+        <p className="mx-auto max-w-3xl text-sm text-destructive" role="alert">
+          Αποτυχία φόρτωσης της καταχώρησης. Δοκιμάστε ξανά.
+        </p>
+      ) : (
+        <ExpenseForm
+          key={`${month}-${existingEntry?.id ?? "new"}`}
+          month={month}
+          initialDate={initialDate}
+          existingEntry={existingEntry}
+        />
+      )}
     </div>
   );
 }
