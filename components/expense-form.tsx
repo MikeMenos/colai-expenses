@@ -3,9 +3,20 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, lastDayOfMonth } from "date-fns";
+import { format } from "date-fns";
 import { el } from "date-fns/locale";
-import { ArrowRight, CalendarIcon, Plus, Trash2 } from "lucide-react";
+import {
+  CalendarIcon,
+  CircleParking,
+  Fuel,
+  Plus,
+  Route as RouteIcon,
+  Tickets,
+  Trash2,
+  Utensils,
+  WalletCards,
+  type LucideIcon,
+} from "lucide-react";
 import {
   useFieldArray,
   useForm,
@@ -26,8 +37,8 @@ import {
 } from "@/components/ui/popover";
 import { useCreateExpense, useUpdateExpense } from "@/hooks/use-expenses";
 import { mileageReimbursement } from "@/lib/calculations";
-import { MILEAGE_RATE, ROUTE_PRESETS } from "@/lib/constants";
-import { formatCurrency } from "@/lib/format";
+import { ROUTE_PRESETS } from "@/lib/constants";
+import { formatCurrency, formatNumber } from "@/lib/format";
 import { isDateInMonth, parseMonth } from "@/lib/month";
 import type { CreateExpenseInput, ExpenseEntry } from "@/lib/types";
 import {
@@ -44,12 +55,48 @@ type ExpenseFormProps = {
 
 type AmountFieldName = "fuel" | "parking" | "tolls" | "dining" | "other";
 
-const AMOUNT_SECTIONS: { name: AmountFieldName; label: string; addLabel: string }[] = [
-  { name: "fuel", label: "Καύσιμα", addLabel: "Προσθήκη άλλου εξόδου καυσίμων" },
-  { name: "parking", label: "Parking", addLabel: "Προσθήκη άλλου εξόδου parking" },
-  { name: "tolls", label: "Διόδια", addLabel: "Προσθήκη άλλου εξόδου διοδίων" },
-  { name: "dining", label: "Έξοδα εστίασης", addLabel: "Προσθήκη άλλου εξόδου εστίασης" },
-  { name: "other", label: "Άλλο", addLabel: "Προσθήκη άλλου εξόδου" },
+const AMOUNT_SECTIONS: {
+  name: AmountFieldName;
+  label: string;
+  addLabel: string;
+  icon: LucideIcon;
+  iconClassName: string;
+}[] = [
+  {
+    name: "fuel",
+    label: "Καύσιμα",
+    addLabel: "Προσθήκη άλλου εξόδου καυσίμων",
+    icon: Fuel,
+    iconClassName: "bg-surface-teal text-accent-teal-ink",
+  },
+  {
+    name: "parking",
+    label: "Parking",
+    addLabel: "Προσθήκη άλλου εξόδου parking",
+    icon: CircleParking,
+    iconClassName: "bg-surface-blue text-accent-blue-ink",
+  },
+  {
+    name: "tolls",
+    label: "Διόδια",
+    addLabel: "Προσθήκη άλλου εξόδου διοδίων",
+    icon: Tickets,
+    iconClassName: "bg-surface-amber text-accent-amber-ink",
+  },
+  {
+    name: "dining",
+    label: "Έξοδα εστίασης",
+    addLabel: "Προσθήκη άλλου εξόδου εστίασης",
+    icon: Utensils,
+    iconClassName: "bg-surface-teal text-accent-teal-ink",
+  },
+  {
+    name: "other",
+    label: "Άλλο",
+    addLabel: "Προσθήκη άλλου εξόδου",
+    icon: WalletCards,
+    iconClassName: "bg-surface-blue text-accent-blue-ink",
+  },
 ];
 
 function initialValues(
@@ -92,7 +139,6 @@ export function ExpenseForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const monthStart = parseMonth(month);
-  const monthEnd = lastDayOfMonth(monthStart);
   const defaultDate = initialDate && isDateInMonth(initialDate, month)
     ? initialDate
     : format(monthStart, "yyyy-MM-dd");
@@ -118,6 +164,7 @@ export function ExpenseForm({
     .map(Number);
   const parsedDate = new Date(selectedYear, selectedMonth - 1, selectedDay);
   const selectedDate = Number.isNaN(parsedDate.getTime()) ? monthStart : parsedDate;
+  const [calendarMonth, setCalendarMonth] = useState(selectedDate);
 
   const kilometers = watchedRoutes.reduce(
     (sum, route) => sum + (Number(route.kilometers) || 0),
@@ -169,25 +216,27 @@ export function ExpenseForm({
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}
-      className="mx-auto flex max-w-3xl flex-col gap-6 pb-44 md:pb-28"
+      className="mx-auto flex max-w-3xl flex-col gap-6"
     >
       <Card>
-        <CardContent className="grid items-start gap-4 pt-6 sm:grid-cols-2">
-          <div className="grid content-start gap-2">
+        <CardContent className="grid grid-cols-2 items-start gap-2 px-3 pt-4 sm:gap-4 sm:px-6 sm:pt-6">
+          <div className="flex min-w-0 flex-col gap-1.5">
             <Label htmlFor="expense-date">Ημερομηνία</Label>
             <Popover>
               <PopoverTrigger
                 id="expense-date"
                 className={cn(
                   buttonVariants({ variant: "outline" }),
-                  "h-10 w-full justify-start text-left font-normal",
+                  "h-8 w-full min-w-0 justify-start gap-1 overflow-hidden px-2 text-left font-normal sm:gap-1.5 sm:px-2.5",
                   !watchedDate && "text-muted-foreground",
                 )}
               >
-                <CalendarIcon className="mr-2 size-4" />
-                {watchedDate
-                  ? format(selectedDate, "d MMMM yyyy", { locale: el })
-                  : "Επιλέξτε ημερομηνία"}
+                <CalendarIcon className="size-4" />
+                <span className="truncate">
+                  {watchedDate
+                    ? format(selectedDate, "d MMM yyyy", { locale: el })
+                    : "Επιλέξτε ημερομηνία"}
+                </span>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
@@ -195,13 +244,18 @@ export function ExpenseForm({
                   selected={selectedDate}
                   onSelect={(date) => {
                     if (date) {
+                      setCalendarMonth(date);
                       form.setValue("date", format(date, "yyyy-MM-dd"), {
                         shouldValidate: true,
                       });
                     }
                   }}
-                  defaultMonth={monthStart}
-                  disabled={(date) => date < monthStart || date > monthEnd}
+                  month={calendarMonth}
+                  onMonthChange={setCalendarMonth}
+                  captionLayout="dropdown"
+                  navLayout="after"
+                  startMonth={new Date(monthStart.getFullYear() - 10, 0, 1)}
+                  endMonth={new Date(monthStart.getFullYear() + 10, 11, 1)}
                   locale={el}
                 />
               </PopoverContent>
@@ -211,12 +265,13 @@ export function ExpenseForm({
             )}
           </div>
 
-          <div className="grid content-start gap-2">
-            <Label htmlFor="licensePlate">Αριθμ. Κυκλοφορίας</Label>
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <Label htmlFor="licensePlate" className="truncate">
+              Αριθμ. Κυκλοφορίας
+            </Label>
             <Input
               id="licensePlate"
               placeholder="π.χ. XZP 6790"
-              className="h-10"
               aria-invalid={Boolean(form.formState.errors.licensePlate)}
               {...form.register("licensePlate")}
             />
@@ -229,7 +284,13 @@ export function ExpenseForm({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Διαδρομές</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <CategoryIcon
+              icon={RouteIcon}
+              className="bg-surface-blue text-accent-blue-ink"
+            />
+            Διαδρομές
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
           {routes.fields.map((field, index) => {
@@ -325,6 +386,8 @@ export function ExpenseForm({
             name={section.name}
             label={section.label}
             addLabel={section.addLabel}
+            icon={section.icon}
+            iconClassName={section.iconClassName}
             fields={amountArrays[section.name].fields}
             append={() => amountArrays[section.name].append({ amount: 0 })}
             remove={amountArrays[section.name].remove}
@@ -332,56 +395,45 @@ export function ExpenseForm({
         ))}
       </div>
 
-      <footer className="fixed inset-x-0 bottom-0 z-40 border-t border-brand-blue/10 bg-background/95 shadow-[0_-8px_30px_rgb(12_45_74/0.08)] backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl flex-col gap-3 px-4 py-3 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-0">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold">Προεπισκόπηση ημέρας</p>
-            <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-              <span>
-                Χιλιόμετρα ({MILEAGE_RATE} €/km):{" "}
-                <strong className="text-foreground">
-                  {formatCurrency(dayReimbursement)}
-                </strong>
-              </span>
-              <span>
-                Λοιπά έξοδα:{" "}
-                <strong className="text-foreground">
-                  {formatCurrency(dayOutOfPocket)}
-                </strong>
-              </span>
-            </div>
-            {submitError && (
-              <p className="mt-1 text-xs text-destructive" role="alert">
-                {submitError}
-              </p>
-            )}
+      {submitError && (
+        <p className="text-sm text-destructive" role="alert">
+          {submitError}
+        </p>
+      )}
+
+      <div className="sticky bottom-0 z-40 -mx-4 mt-2 border-t border-brand-blue/10 bg-background/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-md sm:-mx-6 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              Σύνολο ημέρας
+            </p>
+            <p className="text-2xl leading-tight font-semibold tracking-tight tabular-nums text-accent-blue-ink">
+              {formatCurrency(dayTotal)}
+            </p>
+            <p className="text-xs text-muted-foreground tabular-nums">
+              {formatNumber(kilometers, 0)} km συνολικά
+            </p>
           </div>
 
-          <div className="flex shrink-0 items-center justify-between gap-3 md:justify-end">
-            <div className="mr-auto md:mr-1 md:text-right">
-              <p className="text-[11px] text-muted-foreground">Σύνολο ημέρας</p>
-              <p className="text-lg leading-tight font-semibold tabular-nums text-accent-blue-ink">
-                {formatCurrency(dayTotal)}
-              </p>
-            </div>
+          <div className="flex items-center gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => router.push(`/?month=${month}`)}
+              className="min-h-11"
             >
               Ακύρωση
             </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending
-                ? "Αποθήκευση…"
-                : existingEntry
-                  ? "Αποθήκευση"
-                  : "Καταχώρηση"}
-              {!isPending && <ArrowRight className="size-4" />}
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="min-h-11 px-5"
+            >
+              {isPending ? "Αποθήκευση…" : "Αποθήκευση"}
             </Button>
           </div>
         </div>
-      </footer>
+      </div>
     </form>
   );
 }
@@ -391,6 +443,8 @@ function AmountSection({
   name,
   label,
   addLabel,
+  icon,
+  iconClassName,
   fields,
   append,
   remove,
@@ -399,6 +453,8 @@ function AmountSection({
   name: AmountFieldName;
   label: string;
   addLabel: string;
+  icon: LucideIcon;
+  iconClassName: string;
   fields: { id: string; amount: number }[];
   append: () => void;
   remove: (index: number) => void;
@@ -410,7 +466,10 @@ function AmountSection({
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">{label}</CardTitle>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <CategoryIcon icon={icon} className={iconClassName} />
+          {label}
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {fields.map((field, index) => {
@@ -462,6 +521,23 @@ function AmountSection({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function CategoryIcon({
+  icon: Icon,
+  className,
+}: {
+  icon: LucideIcon;
+  className: string;
+}) {
+  return (
+    <span
+      aria-hidden
+      className={cn("flex size-8 items-center justify-center rounded-lg", className)}
+    >
+      <Icon className="size-4" />
+    </span>
   );
 }
 
